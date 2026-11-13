@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الكاملة (Admin CMS) | Be Belle Boutique</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo-emblem-gold.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        serifBrand: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: {
+                            DEFAULT: '#5B1325', // عنابي ملكي
+                            dark: '#3E0A17',
+                            light: '#7A1B33',
+                        },
+                        gold: {
+                            DEFAULT: '#D4AF37', // ذهبي
+                            light: '#F3E5AB',
+                            dark: '#996515',
+                        },
+                        cta: {
+                            DEFAULT: '#D97706',
+                            hover: '#B45309',
+                        },
+                        darkBg: '#0F172A',
+                        cardBg: '#1E293B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0B1120;
+            color: #F8FAFC;
+        }
+        .burgundy-gradient {
+            background: linear-gradient(135deg, #5B1325 0%, #3E0A17 100%);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 50%, #996515 100%);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0F172A; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+        /* Image Preview Box */
+        .preview-box {
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-gold selection:text-slate-950">
+
+    <!-- =========================================================================
+         1. TOP ADMIN BAR
+         ========================================================================= -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+            
+            <!-- Brand & Page Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full burgundy-gradient border border-gold p-1 flex items-center justify-center shadow shrink-0">
+                    <img id="header-logo-preview" src="assets/logo-emblem-gold.png" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base sm:text-lg font-black text-white">لوحة تحكم صفحة الهبوط</h1>
+                        <span class="bg-gold/20 text-gold border border-gold/30 text-[10px] font-black px-2 py-0.5 rounded-full">CMS v3.0</span>
+                    </div>
+                    <p class="text-xs text-slate-400">تحكم كامل في الشعار، الصور، النصوص، الأسعار، واستقبال الطلبيات</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <!-- Open Live Landing Page -->
+                <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-gold"></i>
+                    <span>معاينة الصفحة</span>
+                </a>
+
+                <!-- Save All Changes -->
+                <button type="button" onclick="saveAllChanges()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-xl shadow-lg transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>حفظ التعديلات</span>
+                </button>
+
+                <!-- Export Full HTML File -->
+                <button type="button" onclick="exportMergedHtmlFile()" class="bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer" title="تنزيل ملف index.html مدمج به كافة التعديلات والصور مباشرة">
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                    <span class="hidden sm:inline">تصدير HTML مدمج</span>
+                </button>
+
+                <!-- Reset Settings -->
+                <button type="button" onclick="confirmResetDefaults()" class="text-slate-400 hover:text-red-400 bg-slate-800/60 hover:bg-red-500/10 p-2 rounded-xl transition cursor-pointer" title="استعادة الإعدادات الأصلية">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2.5 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl font-black text-xs sm:text-sm border-2 border-emerald-400 transition-all">
+        <i class="fa-solid fa-circle-check text-base"></i>
+        <span id="toast-msg">تم حفظ التغييرات بنجاح!</span>
+    </div>
+
+    <!-- =========================================================================
+         2. MAIN DASHBOARD CONTENT
+         ========================================================================= -->
+    <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-1 space-y-6">
+
+        <!-- Quick Stats Overview Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold block">إجمالي الطلبات</span>
+                    <span class="text-2xl font-black text-white mt-0.5 block" id="stat-total-orders">0</span>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold block">طلبات اليوم الجديدة</span>
+                    <span class="text-2xl font-black text-emerald-400 mt-0.5 block" id="stat-today-orders">0</span>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold block">قيمة المبيعات التقديرية</span>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                        <span class="text-2xl font-black text-gold" id="stat-total-revenue">0</span>
+                        <span class="text-xs text-slate-400 font-bold">دج</span>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-400 font-bold block">سعر الطقم الحالي</span>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                        <span class="text-2xl font-black text-cta" id="stat-display-price">4,000</span>
+                        <span class="text-xs text-slate-400 font-bold">دج</span>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs Bar -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800">
+            <button type="button" onclick="switchAdminTab('logo', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-gold text-slate-950 shadow transition cursor-pointer">
+                <i class="fa-solid fa-crown"></i>
+                <span>1. الشعار والهوية</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('pricing', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <span>2. الأسعار والعروض</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('media', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-images"></i>
+                <span>3. الصور والمعرض</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('content', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-pen-nib"></i>
+                <span>4. النصوص والمحتوى</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('reviews', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-comments"></i>
+                <span>5. آراء الزبائن</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('faq', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>6. الأسئلة الشائعة</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('orders', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer relative">
+                <i class="fa-solid fa-box-open"></i>
+                <span>7. سجل الطلبيات (CRM)</span>
+                <span id="crm-badge" class="bg-cta text-white text-[10px] font-black px-1.5 py-0.2 rounded-full hidden">0</span>
+            </button>
+            <button type="button" onclick="switchAdminTab('shipping', this)" class="admin-tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-900 text-slate-300 hover:text-white border border-slate-800 transition cursor-pointer">
+                <i class="fa-solid fa-truck-fast"></i>
+                <span>8. أسعار الشحن (69)</span>
+            </button>
+        </div>
+
+        <!-- =========================================================================
+             TAB 1: LOGO & BRANDING
+             ========================================================================= -->
+        <div id="tab-pane-logo" class="admin-tab-pane space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+                    <div class="w-10 h-10 rounded-xl bg-gold/15 text-gold flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-white">تخصيص الشعار وهوية العلامة التجارية</h3>
+                        <p class="text-xs text-slate-400">يمكنك رفع ملف صورة من جهازك، اختيار الشعار الأفقي، أو كتابة نص الماركة بحرية تامة.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    
+                    <!-- Left: Upload & Logo Inputs -->
+                    <div class="lg:col-span-8 space-y-5">
+                        
+                        <!-- 1. Emblem Icon -->
+                        <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-black text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-gem text-gold"></i>
+                                    <span>أيقونة الشعار الملكية (Emblem Monogram):</span>
+                                </label>
+                                <span class="text-[11px] text-slate-400">تظهر في الترويسة، المعرض، وشريط الإبهام</span>
+                            </div>
+                            <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+                                <input type="text" id="cfg-logo-emblem" placeholder="assets/logo-emblem-gold.png أو رابط الصورة" 
+                                    onchange="updateLogoPreview()"
+                                    class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200">
+                                <label class="bg-gold text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <span>رفع من جهازك</span>
+                                    <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-logo-emblem', updateLogoPreview)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2. Wordmark Text Image -->
+                        <div class="p-4 rounded-2xl bg-slate-800/60 border border-slate-700/80 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label class="text-xs font-black text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-font text-gold"></i>
+                                    <span>صورة اسم الماركة والخط الذهبي (Wordmark):</span>
+                                </label>
+                                <span class="text-[11px] text-slate-400">نص Be Belle BOUTIQUE الذهبي</span>
+                            </div>
+                            <div class="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+                                <input type="text" id="cfg-logo-wordmark" placeholder="assets/logo-wordmark-gold.png أو رابط" 
+                                    onchange="updateLogoPreview()"
+                                    class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200">
+                                <label class="bg-gold text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <span>رفع من جهازك</span>
+                                    <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-logo-wordmark', updateLogoPreview)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Brand Texts -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-black text-slate-300 mb-1.5">اسم المتجر في النصوص (Brand Name):</label>
+                                <input type="text" id="cfg-brand-name" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white font-bold" value="Be Belle Boutique">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-slate-300 mb-1.5">الشعار اللفظي الفرعي (Tagline):</label>
+                                <input type="text" id="cfg-brand-slogan" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-gold font-bold" value="Élégance • Style • Vous">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right: Live Header Logo Preview Box -->
+                    <div class="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+                        <span class="text-xs font-black text-slate-400 block border-b border-slate-800 pb-2">
+                            معاينة حية للشعار في الترويسة:
+                        </span>
+
+                        <!-- Simulation of White Sticky Header -->
+                        <div class="bg-white rounded-2xl p-4 border border-slate-300 shadow flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full burgundy-gradient border-2 border-gold p-1 flex items-center justify-center shrink-0 shadow">
+                                <img id="box-preview-emblem" src="assets/logo-emblem-gold.png" alt="Emblem" class="w-full h-full object-contain">
+                            </div>
+                            <div class="flex flex-col">
+                                <img id="box-preview-wordmark" src="assets/logo-wordmark-gold.png" alt="Wordmark" class="h-8 w-auto object-contain">
+                            </div>
+                        </div>
+
+                        <!-- Simulation on Dark Burgundy Footer -->
+                        <span class="text-[11px] font-black text-slate-400 block pt-1">معاينة الشعار في التذييل العنابي:</span>
+                        <div class="burgundy-gradient rounded-2xl p-4 border border-gold/40 shadow flex items-center justify-center gap-3">
+                            <div class="w-10 h-10 rounded-full border border-gold/60 p-1 bg-white/5 flex items-center justify-center shrink-0">
+                                <img id="box-preview-footer-emblem" src="assets/logo-emblem-gold.png" alt="Emblem" class="w-full h-full object-contain">
+                            </div>
+                            <img id="box-preview-footer-wordmark" src="assets/logo-wordmark-gold.png" alt="Wordmark" class="h-7 w-auto object-contain filter brightness-110">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 2: PRICING & OFFERS
+             ========================================================================= -->
+        <div id="tab-pane-pricing" class="admin-tab-pane hidden space-y-6">
+            
+            <!-- Main Hero Price Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-base sm:text-lg font-black text-white mb-4 flex items-center gap-2 pb-3 border-b border-slate-800">
+                    <i class="fa-solid fa-tags text-gold"></i>
+                    <span>الأسعار المعروضة في واجهة الهيرو:</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-300 mb-1.5">السعر الترويجي الحالي (دج):</label>
+                        <input type="number" id="cfg-price-current" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-lg font-black text-cta" value="4000">
+                        <span class="text-[11px] text-slate-500 mt-1 block">يظهر كالسعر البارز في أعلى الصفحة</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-300 mb-1.5">السعر السابق المشطوب (دج):</label>
+                        <input type="number" id="cfg-price-old" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-400" value="8500">
+                        <span class="text-[11px] text-slate-500 mt-1 block">يظهر مشطوباً لإبراز نسبة التوفير</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-black text-slate-300 mb-1.5">نص شارة الخصم:</label>
+                        <input type="text" id="cfg-price-badge" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-xs font-black text-red-400" value="تخفيض -53% لفترة محدودة">
+                        <span class="text-[11px] text-slate-500 mt-1 block">الشارة الحمراء فوق بطاقة السعر</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two Order Form Packages Customizer -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-base sm:text-lg font-black text-white mb-4 flex items-center gap-2 pb-3 border-b border-slate-800">
+                    <i class="fa-solid fa-layer-group text-gold"></i>
+                    <span>باقات استمارة الطلب (Offer Selection Cards):</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    
+                    <!-- Offer 1 -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <span class="bg-slate-700 text-slate-300 text-[10px] font-black px-2.5 py-0.5 rounded-full">العرض 1: طقم واحد</span>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">عنوان العرض:</label>
+                            <input type="text" id="cfg-offer1-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold" value="طقم واحد (قطعتين)">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">الوصف الفرعي:</label>
+                            <input type="text" id="cfg-offer1-desc" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-400" value="معطف بدون أكمام + فستان بأكمام">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">السعر (دج):</label>
+                            <input type="number" id="cfg-offer1-price" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-cta font-black" value="4000">
+                        </div>
+                    </div>
+
+                    <!-- Offer 2 -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <span class="bg-cta text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">العرض 2: طقمين (الأكثر طلباً)</span>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">عنوان العرض:</label>
+                            <input type="text" id="cfg-offer2-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold" value="عرض طقمين (2)">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">شارة الحافز والتوفير:</label>
+                            <input type="text" id="cfg-offer2-badge" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-gold font-bold" value="توصيل مجاني + توفير 1,000 دج 🔥">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">السعر (دج):</label>
+                                <input type="number" id="cfg-offer2-price" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-cta font-black" value="7000">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-300 mb-1">السعر المشطوب (دج):</label>
+                                <input type="number" id="cfg-offer2-oldprice" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-400" value="8000">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mid Page Nudge Banner Text -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <label class="block text-xs font-black text-slate-300 mb-1.5">نص شريط العرض في منتصف الصفحة (Mid-Page Nudge):</label>
+                <input type="text" id="cfg-mid-banner-title" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-gold font-bold" value="احصلي على الطقم الكامل بـ 4,000 دج فقط (أو طقمين بـ 7,000 دج + توصيل مجاني!)">
+            </div>
+
+        </div>
+
+        <!-- =========================================================================
+             TAB 3: MEDIA & GALLERY (REPLACE TECHNICAL SVG WITH REAL PHOTOS)
+             ========================================================================= -->
+        <div id="tab-pane-media" class="admin-tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
+                    <div class="w-10 h-10 rounded-xl bg-gold/15 text-gold flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-black text-white">إدارة صور المعرض التفاعلي (4 تبويبات)</h3>
+                        <p class="text-xs text-slate-400">يمكنك رفع صور فوتوغرافية حقيقية لكل تبويب، وسيتم استبدال الرسم التوضيحي بالصورة الحقيقية تلقائياً وبأعلى جودة!</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <!-- Tab 0: Full Ensemble -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-person-dress text-gold"></i>
+                                <span>صورة التبويب 1: الطقم كامل (Full Ensemble)</span>
+                            </span>
+                            <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded">الشاشة الرئيسية</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="cfg-img-tab0" placeholder="رابط صورة أو ارفع من جهازك" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                            <label class="bg-gold text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>رفع</span>
+                                <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-img-tab0', updateGalleryPreview)">
+                            </label>
+                        </div>
+                        <div id="preview-tab0" class="h-32 rounded-xl bg-slate-900 border border-slate-700 preview-box flex items-center justify-center text-xs text-slate-500">
+                            لا توجد صورة مخصصة (يتم استخدام الرسم التوضيحي الافتراضي)
+                        </div>
+                    </div>
+
+                    <!-- Tab 1: Pieces (Flat Lay) -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-gold"></i>
+                                <span>صورة التبويب 2: القطعتين منفصلتين</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="cfg-img-tab1" placeholder="رابط صورة أو ارفع من جهازك" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                            <label class="bg-gold text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>رفع</span>
+                                <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-img-tab1', updateGalleryPreview)">
+                            </label>
+                        </div>
+                        <div id="preview-tab1" class="h-32 rounded-xl bg-slate-900 border border-slate-700 preview-box flex items-center justify-center text-xs text-slate-500">
+                            الافتراضي: بطاقتي الفستان والمعطف
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Macro Gold Button & Fabric -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-magnifying-glass-plus text-gold"></i>
+                                <span>صورة التبويب 3: تقريب الأزرار وخامة التويد</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="cfg-img-tab2" placeholder="رابط صورة مقربة للأزرار" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                            <label class="bg-gold text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>رفع</span>
+                                <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-img-tab2', updateGalleryPreview)">
+                            </label>
+                        </div>
+                        <div id="preview-tab2" class="h-32 rounded-xl bg-slate-900 border border-slate-700 preview-box flex items-center justify-center text-xs text-slate-500">
+                            الافتراضي: رسم الماكرو للزر الذهبي
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Back & Seams -->
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-white flex items-center gap-2">
+                                <i class="fa-solid fa-ruler-vertical text-gold"></i>
+                                <span>صورة التبويب 4: القصة والخياطة الخلفية</span>
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="cfg-img-tab3" placeholder="رابط صورة الظهر أو ارفع من جهازك" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+                            <label class="bg-gold text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl cursor-pointer hover:bg-amber-400 transition flex items-center gap-1 shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                <span>رفع</span>
+                                <input type="file" accept="image/*" class="sr-only" onchange="handleImageFileUpload(event, 'cfg-img-tab3', updateGalleryPreview)">
+                            </label>
+                        </div>
+                        <div id="preview-tab3" class="h-32 rounded-xl bg-slate-900 border border-slate-700 preview-box flex items-center justify-center text-xs text-slate-500">
+                            الافتراضي: رسم تفصيل الخياطة الطولية
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 4: TEXTS & COPYWRITING
+             ========================================================================= -->
+        <div id="tab-pane-content" class="admin-tab-pane hidden space-y-6">
+            
+            <!-- Top Strip & Hero Texts -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                <h3 class="text-base sm:text-lg font-black text-white mb-2 pb-3 border-b border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-fancy text-gold"></i>
+                    <span>نصوص الواجهة الرئيسية (Hero & Top Bar):</span>
+                </h3>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-300 mb-1">الشريط الترويجي العلوي (Top Strip):</label>
+                    <input type="text" id="cfg-top-strip" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white" value="عرض الشتاء الحصري: تخفيض -53% + الدفع عند الاستلام لـ 69 ولاية 🇩🇿">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-300 mb-1">شارة فئة المنتج (Category Pill):</label>
+                    <input type="text" id="cfg-hero-pill" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-gold" value="تشكيلة شتاء 2026 الحصرية • صوف تويد فاخر">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-black text-slate-300 mb-1">العنوان الرئيسي قبل الكلمة المميزة:</label>
+                        <input type="text" id="cfg-hero-title-before" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white font-bold" value="إطلالة شتوية ملكية تجمع بين">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-300 mb-1">الكلمة المميزة بالخط الذهبي:</label>
+                        <input type="text" id="cfg-hero-title-highlight" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-gold font-bold" value="الفخامة والاحتشام ✨">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-slate-300 mb-1">الوصف التسويقي للطقم (Hero Paragraph):</label>
+                    <textarea id="cfg-hero-desc" rows="3" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 leading-relaxed">تألقي بطقم Be Belle Boutique المكون من قطعتين: معطف طويل بقصة A-Line بدون أكمام مزين بـ 6 أزرار ذهبية بارزة بنقوش ملكية وتصميم انسيابي ناعم بدون جيوب + فستان داخلي طويل بأكمام طويلة من صوف التويد الدافئ.</textarea>
+                </div>
+            </div>
+
+            <!-- Product Specs 4 Cards -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <h3 class="text-base sm:text-lg font-black text-white mb-4 pb-3 border-b border-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-gold"></i>
+                    <span>بطاقات مواصفات المنتج الـ 4 (Specs & Benefits):</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 space-y-2">
+                        <input type="text" id="cfg-spec1-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-gold font-bold" value="صوف تويد ثقيل دافئ">
+                        <textarea id="cfg-spec1-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">قماش شتوي فاخر بنقشة الهيرينغبون (Herringbone Tweed) يوفر دفئاً ممتازاً وملمساً ناعماً لا يتجعد.</textarea>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 space-y-2">
+                        <input type="text" id="cfg-spec2-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-gold font-bold" value="معطف A-Line بدون أكمام">
+                        <textarea id="cfg-spec2-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">تصميم عصري انسيابي بدون جيوب مع ياقة رسمية وخياطة طولية لضبط المقاس من الخلف برقي.</textarea>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 space-y-2">
+                        <input type="text" id="cfg-spec3-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-gold font-bold" value="6 أزرار ذهبية ملكية">
+                        <textarea id="cfg-spec3-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">أزرار ذهبية بارزة بنقوش كلاسيكية متقنة تضفي لمسة فخامة استثنائية على المعطف وتلفت الأنظار.</textarea>
+                    </div>
+
+                    <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-4 space-y-2">
+                        <input type="text" id="cfg-spec4-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-gold font-bold" value="فستان داخلي متناسق">
+                        <textarea id="cfg-spec4-desc" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300">فستان طويل بأكمام طويلة ورقبة دائرية من نفس الخامة يمنحكِ حرية التنسيق والارتداء بعدة طرق.</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Texts -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
+                <label class="block text-xs font-black text-slate-300 mb-1">وصف التذييل (Footer Note):</label>
+                <input type="text" id="cfg-footer-desc" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-300" value="أزياء محتشمة فاخرة مصممة بعناية للمرأة الجزائرية. توصيل سريع لـ 69 ولاية والدفع عند الاستلام.">
+            </div>
+
+        </div>
+
+        <!-- =========================================================================
+             TAB 5: CUSTOMER REVIEWS (ADD/EDIT/DELETE)
+             ========================================================================= -->
+        <div id="tab-pane-reviews" class="admin-tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gold/15 text-gold flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white">إدارة آراء وتجارب الزبائن</h3>
+                            <p class="text-xs text-slate-400">يمكنك تعديل أي تقييم، حذفه، أو إضافة تجربة جديدة بنقرة زر.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNewReviewCard()" class="bg-gold text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl hover:bg-amber-400 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>إضافة تجربة جديدة</span>
+                    </button>
+                </div>
+
+                <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 6: FAQ ACCORDION (ADD/EDIT/DELETE)
+             ========================================================================= -->
+        <div id="tab-pane-faq" class="admin-tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gold/15 text-gold flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white">إدارة الأسئلة الشائعة (FAQ)</h3>
+                            <p class="text-xs text-slate-400">التحكم في الأسئلة التي تظهر أسفل استمارة الطلب لإزالة تردد الزبونة.</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNewFaqItem()" class="bg-gold text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl hover:bg-amber-400 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>إضافة سؤال جديد</span>
+                    </button>
+                </div>
+
+                <div id="faqs-container" class="space-y-3">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 7: LIVE ORDERS CRM (TABLE & ACTIONS)
+             ========================================================================= -->
+        <div id="tab-pane-orders" class="admin-tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-truck-ramp-box"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white">سجل الطلبيات الواردة (Live CRM)</h3>
+                            <p class="text-xs text-slate-400">تظهر هنا فوراً كافة الطلبات المسجلة من استمارة صفحة الهبوط أو الدرج السريع.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="exportOrdersToCsv()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span>تصدير Excel/CSV</span>
+                        </button>
+                        <button type="button" onclick="clearAllOrders()" class="text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 text-xs font-bold px-3 py-2 rounded-xl border border-red-500/30 transition cursor-pointer">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span>تفريغ السجل</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Orders Table -->
+                <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                    <table class="w-full text-right text-xs text-slate-300">
+                        <thead class="bg-slate-800/80 text-slate-400 font-black border-b border-slate-700">
+                            <tr>
+                                <th class="p-3.5">المرجع</th>
+                                <th class="p-3.5">الاسم الكامل</th>
+                                <th class="p-3.5">رقم الهاتف</th>
+                                <th class="p-3.5">الولاية والبلدية</th>
+                                <th class="p-3.5">المقاس</th>
+                                <th class="p-3.5">العرض</th>
+                                <th class="p-3.5">المجموع الكلي</th>
+                                <th class="p-3.5">الحالة</th>
+                                <th class="p-3.5 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody" class="divide-y divide-slate-800 bg-slate-900/50">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================================================================
+             TAB 8: SHIPPING & WILAYAS
+             ========================================================================= -->
+        <div id="tab-pane-shipping" class="admin-tab-pane hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gold/15 text-gold flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white">تسعيرة التوصيل لـ 69 ولاية جزائرية</h3>
+                            <p class="text-xs text-slate-400">يمكنك تعديل سعر الشحن لأي ولاية فردياً، وسيتم تحديثه فورياً في الاستمارة وحساب الإجمالي.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wilayas-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[520px] overflow-y-auto p-1">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        لوحة التحكم والإدارة CMS v3.0 • Be Belle Boutique Algeria © 2026
+    </footer>
+
+    <!-- =========================================================================
+         JAVASCRIPT LOGIC
+         ========================================================================= -->
+    <script>
+        const CONFIG_KEY = 'be_belle_config';
+        const ORDERS_KEY = 'be_belle_orders';
+
+        // Complete Default Configuration
+        const DEFAULT_CONFIG = {
+            brandName: "Be Belle Boutique",
+            brandSlogan: "Élégance • Style • Vous",
+            logoEmblem: "assets/logo-emblem-gold.png",
+            logoWordmark: "assets/logo-wordmark-gold.png",
+            
+            priceCurrent: 4000,
+            priceOld: 8500,
+            priceBadge: "تخفيض -53% لفترة محدودة",
+            
+            offer1Title: "طقم واحد (قطعتين)",
+            offer1Desc: "معطف بدون أكمام + فستان بأكمام",
+            offer1Price: 4000,
+
+            offer2Title: "عرض طقمين (2)",
+            offer2Badge: "توصيل مجاني + توفير 1,000 دج 🔥",
+            offer2Price: 7000,
+            offer2OldPrice: 8000,
+
+            midBannerTitle: "احصلي على الطقم الكامل بـ 4,000 دج فقط (أو طقمين بـ 7,000 دج + توصيل مجاني!)",
+
+            imgTab0: "",
+            imgTab1: "",
+            imgTab2: "",
+            imgTab3: "",
+
+            topStrip: "عرض الشتاء الحصري: تخفيض -53% + الدفع عند الاستلام لـ 69 ولاية 🇩🇿",
+            heroPill: "تشكيلة شتاء 2026 الحصرية • صوف تويد فاخر",
+            heroTitleBefore: "إطلالة شتوية ملكية تجمع بين",
+            heroTitleHighlight: "الفخامة والاحتشام ✨",
+            heroDesc: "تألقي بطقم Be Belle Boutique المكون من قطعتين: معطف طويل بقصة A-Line بدون أكمام مزين بـ 6 أزرار ذهبية بارزة بنقوش ملكية وتصميم انسيابي ناعم بدون جيوب + فستان داخلي طويل بأكمام طويلة من صوف التويد الدافئ.",
+
+            spec1Title: "صوف تويد ثقيل دافئ",
+            spec1Desc: "قماش شتوي فاخر بنقشة الهيرينغبون (Herringbone Tweed) يوفر دفئاً ممتازاً وملمساً ناعماً لا يتجعد.",
+            spec2Title: "معطف A-Line بدون أكمام",
+            spec2Desc: "تصميم عصري انسيابي بدون جيوب مع ياقة رسمية وخياطة طولية لضبط المقاس من الخلف برقي.",
+            spec3Title: "6 أزرار ذهبية ملكية",
+            spec3Desc: "أزرار ذهبية بارزة بنقوش كلاسيكية متقنة تضفي لمسة فخامة استثنائية على المعطف وتلفت الأنظار.",
+            spec4Title: "فستان داخلي متناسق",
+            spec4Desc: "فستان طويل بأكمام طويلة ورقبة دائرية من نفس الخامة يمنحكِ حرية التنسيق والارتداء بعدة طرق.",
+
+            footerDesc: "أزياء محتشمة فاخرة مصممة بعناية للمرأة الجزائرية. توصيل سريع لـ 69 ولاية والدفع عند الاستلام."
+        };
+
+        // Default 69 Algerian Wilayas
+        const DEFAULT_WILAYAS = [
+            { code: "01", name: "أدرار", fee: 900 },
+            { code: "02", name: "الشلف", fee: 600 },
+            { code: "03", name: "الأغواط", fee: 700 },
+            { code: "04", name: "أم البواقي", fee: 600 },
+            { code: "05", name: "باتنة", fee: 600 },
+            { code: "06", name: "بجاية", fee: 600 },
+            { code: "07", name: "بسكرة", fee: 700 },
+            { code: "08", name: "بشار", fee: 900 },
+            { code: "09", name: "البليدة", fee: 500 },
+            { code: "10", name: "البويرة", fee: 600 },
+            { code: "11", name: "تمنراست", fee: 1000 },
+            { code: "12", name: "تبسة", fee: 600 },
+            { code: "13", name: "تلمسان", fee: 600 },
+            { code: "14", name: "تيارت", fee: 600 },
+            { code: "15", name: "تيزي وزو", fee: 600 },
+            { code: "16", name: "الجزائر العاصمة", fee: 400 },
+            { code: "17", name: "الجلفة", fee: 700 },
+            { code: "18", name: "جيجل", fee: 600 },
+            { code: "19", name: "سطيف", fee: 600 },
+            { code: "20", name: "سعيدة", fee: 600 },
+            { code: "21", name: "سكيكدة", fee: 600 },
+            { code: "22", name: "سيدي بلعباس", fee: 600 },
+            { code: "23", name: "عنابة", fee: 600 },
+            { code: "24", name: "قالمة", fee: 600 },
+            { code: "25", name: "قسنطينة", fee: 600 },
+            { code: "26", name: "المدية", fee: 550 },
+            { code: "27", name: "مستغانم", fee: 550 },
+            { code: "28", name: "المسيلة", fee: 650 },
+            { code: "29", name: "معسكر", fee: 550 },
+            { code: "30", name: "ورقلة", fee: 800 },
+            { code: "31", name: "وهران", fee: 450 },
+            { code: "32", name: "البيض", fee: 750 },
+            { code: "33", name: "إليزي", fee: 1000 },
+            { code: "34", name: "برج بوعريريج", fee: 600 },
+            { code: "35", name: "بومرداس", fee: 500 },
+            { code: "36", name: "الطارف", fee: 600 },
+            { code: "37", name: "تندوف", fee: 1000 },
+            { code: "38", name: "تيسمسيلت", fee: 600 },
+            { code: "39", name: "الوادي", fee: 800 },
+            { code: "40", name: "خنشلة", fee: 600 },
+            { code: "41", name: "سوق أهراس", fee: 600 },
+            { code: "42", name: "تيبازة", fee: 500 },
+            { code: "43", name: "ميلة", fee: 600 },
+            { code: "44", name: "عين الدفلى", fee: 550 },
+            { code: "45", name: "النعامة", fee: 750 },
+            { code: "46", name: "عين تموشنت", fee: 550 },
+            { code: "47", name: "غرداية", fee: 800 },
+            { code: "48", name: "غليزان", fee: 550 },
+            { code: "49", name: "تيميمون", fee: 950 },
+            { code: "50", name: "برج باجي مختار", fee: 1000 },
+            { code: "51", name: "أولاد جلال", fee: 750 },
+            { code: "52", name: "بني عباس", fee: 950 },
+            { code: "53", name: "عين صالح", fee: 1000 },
+            { code: "54", name: "عين قزام", fee: 1000 },
+            { code: "55", name: "تقرت", fee: 800 },
+            { code: "56", name: "جانت", fee: 1000 },
+            { code: "57", name: "المغير", fee: 800 },
+            { code: "58", name: "المنيعة", fee: 850 },
+            { code: "59", name: "أفلو", fee: 700 },
+            { code: "60", name: "بريكة", fee: 650 },
+            { code: "61", name: "القنطرة", fee: 700 },
+            { code: "62", name: "بير العاتر", fee: 700 },
+            { code: "63", name: "العريشة", fee: 650 },
+            { code: "64", name: "قصر الشلالة", fee: 650 },
+            { code: "65", name: "عين وسارة", fee: 650 },
+            { code: "66", name: "مسعد", fee: 700 },
+            { code: "67", name: "قصر البخاري", fee: 600 },
+            { code: "68", name: "بوسعادة", fee: 650 },
+            { code: "69", name: "الأبيض سيدي الشيخ", fee: 750 }
+        ];
+
+        let currentConfig = { ...DEFAULT_CONFIG };
+        let currentWilayas = [...DEFAULT_WILAYAS];
+        let currentReviews = [
+            { name: "أمينة ب.", city: "وهران 🇩🇿", text: "القماش تويد ثقيل ودافئ بزاف، والأزرار الذهبية عطاتو فخامة كبيرة. المعطف جا انسيابي وأنيق بلا جيوب زايدة. وصلني في 24 ساعة لوهران وفتحت الطرد قبل الدفع." },
+            { name: "سارة م.", city: "الجزائر العاصمة 🇩🇿", text: "ديت عرض الطقمين أنا وأختي بـ 7000 دج وتوصيل مجاني للعاصمة. الخياطة الخلفية تضبط المقاس روعة والفستان الداخلي بأكمام دافئ ومريح للعمل." },
+            { name: "خديجة ر.", city: "قسنطينة 🇩🇿", text: "ما شاء الله قماش الهيرينغبون واقف وميتكمشش، والمقاس L جا قدّي تماماً. تعامل راقي وتأكيد سريع عبر الهاتف." }
+        ];
+        let currentFaqs = [
+            { q: "متى يصلني الطلب بعد تأكيده؟", a: "يتم شحن طلبكِ فور تأكيده هاتفياً ويصلكِ خلال 24 إلى 48 ساعة لولايات الشمال والوسط، و48 إلى 72 ساعة لولايات الجنوب." },
+            { q: "هل يمكنني فحص المنتج قبل الدفع؟", a: "نعم بالتأكيد! الدفع نقداً عند الاستلام يداً بيد مع إمكانية فتح الطرد والتحقق من جودة قماش التويد والأزرار الذهبية قبل الدفع." },
+            { q: "هل يتوفر استبدال المقاس؟", a: "نعم، نضمن لكِ استبدال المقاس بكل سهولة (من S إلى XXL) في حال لم يناسبكِ، بشرط بقاء الطقم في حالته الأصلية." }
+        ];
+
+        // Switch Tabs
+        function switchAdminTab(tabId, btn) {
+            document.querySelectorAll('.admin-tab-pane').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`tab-pane-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.admin-tab-btn').forEach(b => {
+                b.classList.remove('bg-gold', 'text-slate-950');
+                b.classList.add('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+            });
+            btn.classList.remove('bg-slate-900', 'text-slate-300', 'border', 'border-slate-800');
+            btn.classList.add('bg-gold', 'text-slate-950');
+        }
+
+        // Load Stored Configuration
+        function loadAllConfig() {
+            const saved = localStorage.getItem(CONFIG_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    currentConfig = { ...DEFAULT_CONFIG, ...parsed };
+                    if (parsed.wilayas) currentWilayas = parsed.wilayas;
+                    if (parsed.reviews) currentReviews = parsed.reviews;
+                    if (parsed.faqs) currentFaqs = parsed.faqs;
+                } catch (e) {
+                    console.error("Config parse error:", e);
+                }
+            }
+
+            // Populate Logo & Brand
+            document.getElementById('cfg-brand-name').value = currentConfig.brandName;
+            document.getElementById('cfg-brand-slogan').value = currentConfig.brandSlogan;
+            document.getElementById('cfg-logo-emblem').value = currentConfig.logoEmblem;
+            document.getElementById('cfg-logo-wordmark').value = currentConfig.logoWordmark;
+            updateLogoPreview();
+
+            // Populate Prices
+            document.getElementById('cfg-price-current').value = currentConfig.priceCurrent;
+            document.getElementById('cfg-price-old').value = currentConfig.priceOld;
+            document.getElementById('cfg-price-badge').value = currentConfig.priceBadge;
+            document.getElementById('cfg-offer1-title').value = currentConfig.offer1Title;
+            document.getElementById('cfg-offer1-desc').value = currentConfig.offer1Desc;
+            document.getElementById('cfg-offer1-price').value = currentConfig.offer1Price;
+            document.getElementById('cfg-offer2-title').value = currentConfig.offer2Title;
+            document.getElementById('cfg-offer2-badge').value = currentConfig.offer2Badge;
+            document.getElementById('cfg-offer2-price').value = currentConfig.offer2Price;
+            document.getElementById('cfg-offer2-oldprice').value = currentConfig.offer2OldPrice;
+            document.getElementById('cfg-mid-banner-title').value = currentConfig.midBannerTitle;
+            document.getElementById('stat-display-price').textContent = currentConfig.priceCurrent.toLocaleString('en-US');
+
+            // Populate Gallery Image Inputs
+            document.getElementById('cfg-img-tab0').value = currentConfig.imgTab0 || '';
+            document.getElementById('cfg-img-tab1').value = currentConfig.imgTab1 || '';
+            document.getElementById('cfg-img-tab2').value = currentConfig.imgTab2 || '';
+            document.getElementById('cfg-img-tab3').value = currentConfig.imgTab3 || '';
+            updateGalleryPreview();
+
+            // Populate Texts
+            document.getElementById('cfg-top-strip').value = currentConfig.topStrip;
+            document.getElementById('cfg-hero-pill').value = currentConfig.heroPill;
+            document.getElementById('cfg-hero-title-before').value = currentConfig.heroTitleBefore;
+            document.getElementById('cfg-hero-title-highlight').value = currentConfig.heroTitleHighlight;
+            document.getElementById('cfg-hero-desc').value = currentConfig.heroDesc;
+
+            document.getElementById('cfg-spec1-title').value = currentConfig.spec1Title;
+            document.getElementById('cfg-spec1-desc').value = currentConfig.spec1Desc;
+            document.getElementById('cfg-spec2-title').value = currentConfig.spec2Title;
+            document.getElementById('cfg-spec2-desc').value = currentConfig.spec2Desc;
+            document.getElementById('cfg-spec3-title').value = currentConfig.spec3Title;
+            document.getElementById('cfg-spec3-desc').value = currentConfig.spec3Desc;
+            document.getElementById('cfg-spec4-title').value = currentConfig.spec4Title;
+            document.getElementById('cfg-spec4-desc').value = currentConfig.spec4Desc;
+
+            document.getElementById('cfg-footer-desc').value = currentConfig.footerDesc;
+
+            // Render Dynamic Arrays
+            renderReviews();
+            renderFaqs();
+            renderWilayas();
+            loadOrdersCRM();
+        }
+
+        // Live Logo Preview Update
+        function updateLogoPreview() {
+            const emblem = document.getElementById('cfg-logo-emblem').value.trim() || 'assets/logo-emblem-gold.png';
+            const wordmark = document.getElementById('cfg-logo-wordmark').value.trim() || 'assets/logo-wordmark-gold.png';
+
+            document.getElementById('header-logo-preview').src = emblem;
+            document.getElementById('box-preview-emblem').src = emblem;
+            document.getElementById('box-preview-wordmark').src = wordmark;
+            document.getElementById('box-preview-footer-emblem').src = emblem;
+            document.getElementById('box-preview-footer-wordmark').src = wordmark;
+        }
+
+        // Live Gallery Preview Update
+        function updateGalleryPreview() {
+            const tabs = ['tab0', 'tab1', 'tab2', 'tab3'];
+            tabs.forEach(t => {
+                const url = document.getElementById(`cfg-img-${t}`).value.trim();
+                const box = document.getElementById(`preview-${t}`);
+                if (url) {
+                    box.style.backgroundImage = `url('${url}')`;
+                    box.textContent = '';
+                } else {
+                    box.style.backgroundImage = 'none';
+                    box.textContent = 'يتم استخدام الرسم الافتراضي';
+                }
+            });
+        }
+
+        // Handle Image File Upload (Convert to Base64 with smart resize)
+        function handleImageFileUpload(e, targetInputId, callback) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 1200;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedBase64 = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.82);
+                    document.getElementById(targetInputId).value = compressedBase64;
+                    if (callback) callback();
+                    showToast('تم رفع الصورة بنجاح!');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Render Reviews
+        function renderReviews() {
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = '';
+            currentReviews.forEach((rev, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800/70 border border-slate-700 rounded-2xl p-4 space-y-3 relative';
+                card.innerHTML = `
+                    <button type="button" onclick="deleteReviewItem(${idx})" class="absolute top-3 left-3 text-red-400 hover:text-red-300 text-xs cursor-pointer" title="حذف هذا الرأي">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-0.5">اسم الزبونة:</label>
+                            <input type="text" value="${rev.name}" oninput="currentReviews[${idx}].name = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-0.5">الولاية:</label>
+                            <input type="text" value="${rev.city}" oninput="currentReviews[${idx}].city = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-gold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-0.5">نص التجربة:</label>
+                        <textarea rows="3" oninput="currentReviews[${idx}].text = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 leading-relaxed">${rev.text}</textarea>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addNewReviewCard() {
+            currentReviews.push({ name: "زبونة جديدة", city: "الجزائر العاصمة 🇩🇿", text: "طقم رائع جداً والقماش ثقيل ودافئ ووصل في وقت قياسي." });
+            renderReviews();
+            showToast('تمت إضافة بطاقة تجربة جديدة!');
+        }
+
+        function deleteReviewItem(idx) {
+            if (confirm('هل أنتِ متأكدة من حذف هذا الرأي؟')) {
+                currentReviews.splice(idx, 1);
+                renderReviews();
+            }
+        }
+
+        // Render FAQs
+        function renderFaqs() {
+            const container = document.getElementById('faqs-container');
+            container.innerHTML = '';
+            currentFaqs.forEach((faq, idx) => {
+                const item = document.createElement('div');
+                item.className = 'bg-slate-800/70 border border-slate-700 rounded-2xl p-4 space-y-2 relative';
+                item.innerHTML = `
+                    <button type="button" onclick="deleteFaqItem(${idx})" class="absolute top-3 left-3 text-red-400 hover:text-red-300 text-xs cursor-pointer" title="حذف هذا السؤال">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-0.5">السؤال (${idx + 1}):</label>
+                        <input type="text" value="${faq.q}" oninput="currentFaqs[${idx}].q = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-0.5">الإجابة والتوضيح:</label>
+                        <textarea rows="2" oninput="currentFaqs[${idx}].a = this.value" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300">${faq.a}</textarea>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function addNewFaqItem() {
+            currentFaqs.push({ q: "سؤال جديد؟", a: "إجابة واضحة ومطمئنة للزبونة..." });
+            renderFaqs();
+            showToast('تمت إضافة سؤال جديد!');
+        }
+
+        function deleteFaqItem(idx) {
+            if (confirm('هل أنتِ متأكدة من حذف هذا السؤال؟')) {
+                currentFaqs.splice(idx, 1);
+                renderFaqs();
+            }
+        }
+
+        // Render 69 Wilayas
+        function renderWilayas() {
+            const grid = document.getElementById('wilayas-grid');
+            grid.innerHTML = '';
+            currentWilayas.forEach((w, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800/50 border border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between gap-2';
+                card.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-mono bg-slate-900 text-gold px-1.5 py-0.5 rounded font-bold">${w.code}</span>
+                        <span class="text-xs font-bold text-white">${w.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1 w-24">
+                        <input type="number" step="50" value="${w.fee}" oninput="currentWilayas[${idx}].fee = parseInt(this.value) || 0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-center text-cta font-bold">
+                        <span class="text-[10px] text-slate-400 font-bold">دج</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Save All Changes to LocalStorage
+        function saveAllChanges() {
+            currentConfig = {
+                brandName: document.getElementById('cfg-brand-name').value.trim(),
+                brandSlogan: document.getElementById('cfg-brand-slogan').value.trim(),
+                logoEmblem: document.getElementById('cfg-logo-emblem').value.trim(),
+                logoWordmark: document.getElementById('cfg-logo-wordmark').value.trim(),
+
+                priceCurrent: parseInt(document.getElementById('cfg-price-current').value) || 4000,
+                priceOld: parseInt(document.getElementById('cfg-price-old').value) || 8500,
+                priceBadge: document.getElementById('cfg-price-badge').value.trim(),
+
+                offer1Title: document.getElementById('cfg-offer1-title').value.trim(),
+                offer1Desc: document.getElementById('cfg-offer1-desc').value.trim(),
+                offer1Price: parseInt(document.getElementById('cfg-offer1-price').value) || 4000,
+
+                offer2Title: document.getElementById('cfg-offer2-title').value.trim(),
+                offer2Badge: document.getElementById('cfg-offer2-badge').value.trim(),
+                offer2Price: parseInt(document.getElementById('cfg-offer2-price').value) || 7000,
+                offer2OldPrice: parseInt(document.getElementById('cfg-offer2-oldprice').value) || 8000,
+
+                midBannerTitle: document.getElementById('cfg-mid-banner-title').value.trim(),
+
+                imgTab0: document.getElementById('cfg-img-tab0').value.trim(),
+                imgTab1: document.getElementById('cfg-img-tab1').value.trim(),
+                imgTab2: document.getElementById('cfg-img-tab2').value.trim(),
+                imgTab3: document.getElementById('cfg-img-tab3').value.trim(),
+
+                topStrip: document.getElementById('cfg-top-strip').value.trim(),
+                heroPill: document.getElementById('cfg-hero-pill').value.trim(),
+                heroTitleBefore: document.getElementById('cfg-hero-title-before').value.trim(),
+                heroTitleHighlight: document.getElementById('cfg-hero-title-highlight').value.trim(),
+                heroDesc: document.getElementById('cfg-hero-desc').value.trim(),
+
+                spec1Title: document.getElementById('cfg-spec1-title').value.trim(),
+                spec1Desc: document.getElementById('cfg-spec1-desc').value.trim(),
+                spec2Title: document.getElementById('cfg-spec2-title').value.trim(),
+                spec2Desc: document.getElementById('cfg-spec2-desc').value.trim(),
+                spec3Title: document.getElementById('cfg-spec3-title').value.trim(),
+                spec3Desc: document.getElementById('cfg-spec3-desc').value.trim(),
+                spec4Title: document.getElementById('cfg-spec4-title').value.trim(),
+                spec4Desc: document.getElementById('cfg-spec4-desc').value.trim(),
+
+                footerDesc: document.getElementById('cfg-footer-desc').value.trim(),
+
+                wilayas: currentWilayas,
+                reviews: currentReviews,
+                faqs: currentFaqs
+            };
+
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(currentConfig));
+            document.getElementById('stat-display-price').textContent = currentConfig.priceCurrent.toLocaleString('en-US');
+            showToast('تم حفظ كافة التعديلات بنجاح! سيتم تطبيقها فوراً في صفحة الهبوط.');
+        }
+
+        // Live CRM: Load and Render Orders
+        function loadOrdersCRM() {
+            const raw = localStorage.getItem(ORDERS_KEY);
+            let orders = [];
+            if (raw) {
+                try { orders = JSON.parse(raw); } catch (e) { orders = []; }
+            }
+
+            document.getElementById('stat-total-orders').textContent = orders.length;
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayOrders = orders.filter(o => o.timestamp && o.timestamp.startsWith(todayStr)).length;
+            document.getElementById('stat-today-orders').textContent = todayOrders;
+
+            let rev = 0;
+            orders.forEach(o => {
+                const num = parseInt(String(o.total).replace(/[^0-9]/g, '')) || 0;
+                rev += num;
+            });
+            document.getElementById('stat-total-revenue').textContent = rev.toLocaleString('en-US');
+
+            const badge = document.getElementById('crm-badge');
+            if (orders.length > 0) {
+                badge.textContent = orders.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            const tbody = document.getElementById('orders-tbody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500">لا توجد طلبيات مسجلة بعد. عند إرسال أي طلبية من صفحة الهبوط ستظهر هنا فوراً.</td></tr>`;
+                return;
+            }
+
+            orders.forEach((ord, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition';
+                tr.innerHTML = `
+                    <td class="p-3.5 font-mono text-gold font-bold">${ord.ref || ('BB-' + (1000 + idx))}</td>
+                    <td class="p-3.5 font-bold text-white">${ord.name || '--'}</td>
+                    <td class="p-3.5" dir="ltr">
+                        <a href="tel:${ord.phone}" class="text-cta font-bold hover:underline">${ord.phone || '--'}</a>
+                    </td>
+                    <td class="p-3.5">${ord.location || '--'}</td>
+                    <td class="p-3.5"><span class="bg-primary/20 text-gold font-black px-2 py-0.5 rounded">${ord.size || 'M'}</span></td>
+                    <td class="p-3.5">${ord.offer === '2' ? 'طقمين (توفير)' : 'طقم واحد'}</td>
+                    <td class="p-3.5 font-black text-emerald-400">${ord.total || '--'}</td>
+                    <td class="p-3.5">
+                        <select onchange="updateOrderStatus(${idx}, this.value)" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] font-bold text-slate-200">
+                            <option value="جديد" ${ord.status === 'جديد' ? 'selected' : ''}>🟡 جديد</option>
+                            <option value="مؤكد" ${ord.status === 'مؤكد' ? 'selected' : ''}>🟢 مؤكد</option>
+                            <option value="قيد الشحن" ${ord.status === 'قيد الشحن' ? 'selected' : ''}>🚚 قيد الشحن</option>
+                            <option value="تم التسليم" ${ord.status === 'تم التسليم' ? 'selected' : ''}>✅ تم التسليم</option>
+                            <option value="ملغى" ${ord.status === 'ملغى' ? 'selected' : ''}>❌ ملغى</option>
+                        </select>
+                    </td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <a href="https://wa.me/213${(ord.phone || '').replace(/^0/, '')}" target="_blank" class="p-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-lg transition" title="محادثة واتساب">
+                                <i class="fa-brands fa-whatsapp"></i>
+                            </a>
+                            <button type="button" onclick="deleteOrderItem(${idx})" class="p-1.5 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition" title="حذف الطلبية">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateOrderStatus(idx, newStatus) {
+            const raw = localStorage.getItem(ORDERS_KEY);
+            if (!raw) return;
+            const orders = JSON.parse(raw);
+            orders[idx].status = newStatus;
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            showToast('تم تحديث حالة الطلبية!');
+        }
+
+        function deleteOrderItem(idx) {
+            if (confirm('هل أنتِ متأكدة من حذف هذه الطلبية؟')) {
+                const raw = localStorage.getItem(ORDERS_KEY);
+                if (!raw) return;
+                const orders = JSON.parse(raw);
+                orders.splice(idx, 1);
+                localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+                loadOrdersCRM();
+            }
+        }
+
+        function clearAllOrders() {
+            if (confirm('تنبيه: هل تريدين حقاً تفريغ وحذف كافة الطلبيات؟')) {
+                localStorage.removeItem(ORDERS_KEY);
+                loadOrdersCRM();
+                showToast('تم تفريغ سجل الطلبيات.');
+            }
+        }
+
+        function exportOrdersToCsv() {
+            const raw = localStorage.getItem(ORDERS_KEY);
+            if (!raw) { alert('لا توجد طلبات لتصديرها!'); return; }
+            const orders = JSON.parse(raw);
+            if (orders.length === 0) { alert('لا توجد طلبات لتصديرها!'); return; }
+
+            let csv = '\uFEFFالمرجع,الاسم,الهاتف,الولاية_والبلدية,المقاس,العرض,المجموع,الحالة,التاريخ\n';
+            orders.forEach(o => {
+                csv += `"${o.ref || ''}","${o.name || ''}","${o.phone || ''}","${o.location || ''}","${o.size || ''}","${o.offer || ''}","${o.total || ''}","${o.status || 'جديد'}","${o.timestamp || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `طلبيات_Be_Belle_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Export Full Merged HTML File with all changes baked in
+        async function exportMergedHtmlFile() {
+            saveAllChanges();
+            try {
+                const res = await fetch('index.html');
+                if (!res.ok) throw new Error('تعذر قراءة index.html');
+                let html = await res.text();
+
+                // Inject saved config right before closing body tag so it works standalone even without localStorage
+                const injection = `
+    <!-- Baked Configuration by Admin CMS -->
+    <script>
+        window.BAKED_CONFIG = ${JSON.stringify(currentConfig)};
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.applyConfigToPage) window.applyConfigToPage(window.BAKED_CONFIG);
+        });
+    <\/script>
+                `;
+                html = html.replace('</body>', `${injection}\n</body>`);
+
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'index.html';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('تم تصدير ملف index.html المدمج بنجاح!');
+            } catch (err) {
+                alert('تم حفظ التعديلات محلياً. لتنزيل الملف، يمكنك نسخه أو نشره مباشرة.');
+            }
+        }
+
+        function confirmResetDefaults() {
+            if (confirm('هل تريدين حقاً استعادة الإعدادات الأصلية الافتراضية؟')) {
+                localStorage.removeItem(CONFIG_KEY);
+                currentConfig = { ...DEFAULT_CONFIG };
+                currentWilayas = [...DEFAULT_WILAYAS];
+                loadAllConfig();
+                showToast('تمت استعادة الإعدادات الافتراضية.');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3000);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllConfig();
+        });
+    </script>
+</body>
+</html>
